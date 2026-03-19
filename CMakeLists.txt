@@ -13,8 +13,6 @@ set(CMAKE_PREFIX_PATH "/opt/homebrew/opt/qt@5/lib/cmake")
 
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 
-# qt_standard_project_setup()
-
 add_executable(app
     src/main.cpp
     src/ui.cpp
