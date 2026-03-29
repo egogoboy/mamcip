@@ -17,6 +17,13 @@ class UI : public QMainWindow {
 
    private:
     void initMenuBar();
+    void initLayout();
+    void initValidator();
+
+    QWidget* _window;
+    QValidator* _input_text_validator;
+    QValidator* _key_validator;
+    QLineEdit* _input_line;
 
     const QString ABOUT_MESSAGE = R"(
 Программа "Шифрование методами подстановки"

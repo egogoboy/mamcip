@@ -6,9 +6,24 @@ UI::UI(size_t height, size_t width) {
     resize(width, height);
     setWindowTitle("Шифрование методами подстановки");
 
+    _window = new QWidget(this);
+    setCentralWidget(_window);
     initMenuBar();
+    initValidator();
+    initLayout();
 
     show();
+}
+
+void UI::initLayout() {
+    _input_line = new QLineEdit(_window);
+    _input_line->setValidator(_input_text_validator);
+}
+
+void UI::initValidator() {
+    QRegularExpression rx("(?(?=[А-Я_])[^Й]|^$){0,30}");
+    _input_text_validator = new QRegularExpressionValidator(rx, _window);
+    _key_validator = new QIntValidator(0, 1000, _window);
 }
 
 void UI::initMenuBar() {
@@ -61,15 +76,25 @@ void UI::initMenuBar() {
                 &UI::showNotImplementedWarning);
     }
 }
+
 void UI::askKey() {
     bool ok;
+    do {
+        QString key =
+            QInputDialog::getText(this, "Ключ", "", QLineEdit::Normal, "", &ok);
 
-    QString key =
-        QInputDialog::getText(this, "Ключ", "", QLineEdit::Normal, "", &ok);
+        int pos = 0;
 
-    if (ok && !key.isEmpty()) {
-        QMessageBox::information(this, "Key", key);
-    }
+        ok = ok &&
+             _key_validator->validate(key, pos) == QIntValidator::Acceptable;
+
+        QMessageBox* msg;
+        if (ok && !key.isEmpty()) {
+            QMessageBox::information(this, "Key", key);
+        } else {
+            QMessageBox::warning(this, "", "Значение ключа неправильное");
+        }
+    } while (!ok);
 }
 
 void UI::showNotImplementedWarning() {
