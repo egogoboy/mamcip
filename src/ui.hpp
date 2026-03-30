@@ -21,6 +21,7 @@ class UI : public QMainWindow {
     void initMenuBar();
     void initLayout();
     void initValidator();
+    void initWidgets();
 
     QWidget* _window;
     QValidator* _input_text_validator;
