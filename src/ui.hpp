@@ -24,13 +24,14 @@ class UI : public QMainWindow {
     QValidator* _input_text_validator;
     QValidator* _key_validator;
     QLineEdit* _input_line;
+    QInputDialog* _key_input_dialog;
 
     const QString ABOUT_MESSAGE = R"(
-Программа "Шифрование методами подстановки"
+Шифрование методами подстановки
 
-Назначение программы: программа предназначена для ознакомления с шифрованием методами подстановки
+Шифрование моноалфавитным методом
 
-Автор: Судаков Егор, группа ИПБ-23)";
+Судаков Е.Ю., ИПБ-23)";
 
     const QString HELP_MESSAGE = R"(
 Not implemented
