@@ -1,6 +1,7 @@
 #include "ui.hpp"
 
 #include <QtWidgets>
+#include <iostream>
 
 #include "encoding.cpp"
 
@@ -10,6 +11,9 @@ UI::UI(size_t height, size_t width) {
 
     _window = new QWidget(this);
     setCentralWidget(_window);
+
+    _save_file = new QSaveFile(_window);
+
     initMenuBar();
     initValidator();
     initLayout();
@@ -65,8 +69,10 @@ void UI::initMenuBar() {
             &UI::createTemporaryFile);
     connectedAction = fileMenu->addAction("Открыть");
     connect(connectedAction, &QAction::triggered, this, &UI::openFile);
-    fileMenu->addAction("Сохранить");
-    fileMenu->addAction("Сохранить как");
+    connectedAction = fileMenu->addAction("Сохранить");
+    connect(connectedAction, &QAction::triggered, this, &UI::saveFile);
+    connectedAction = fileMenu->addAction("Сохранить как");
+    connect(connectedAction, &QAction::triggered, this, &UI::saveFileAs);
     QAction* nonInteractiveAction = fileMenu->addAction("");
     nonInteractiveAction->setEnabled(false);
     connectedAction = fileMenu->addAction("Выход");
@@ -143,14 +149,33 @@ void UI::decode() {
 void UI::openFile() {
     _current_file = QFileDialog::getOpenFileName(this, tr("Открыть файл"), ".",
                                                  tr("Text Files (*.txt)"));
+    _save_file->setFileName(_current_file);
     _encrypt_menu->setEnabled(true);
     _decrypt_menu->setEnabled(true);
 }
 
 void UI::createTemporaryFile() {
-    _current_file = "Новый файл";
+    _file.setFileName("Новый файл");
     _encrypt_menu->setEnabled(true);
     _decrypt_menu->setEnabled(true);
+}
+
+void UI::saveFileAs() {
+    _file.setFileName(QFileDialog::getSaveFileName(_window, tr("Сохранить как"),
+                                                   "", tr("All Files (*)")));
+    saveFile();
+}
+
+void UI::saveFile() {
+    if (!_file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::information(this, tr("Не удалось открыть файл"),
+                                 _file.errorString());
+        return;
+    }
+
+    QTextStream out(&_file);
+    out << _last_string.value();
+    _file.close();
 }
 
 void UI::showNotImplementedWarning() {

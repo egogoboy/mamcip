@@ -17,6 +17,8 @@ class UI : public QMainWindow {
     void decode();
     void openFile();
     void createTemporaryFile();
+    void saveFile();
+    void saveFileAs();
 
    private:
     void initMenuBar();
@@ -34,6 +36,8 @@ class UI : public QMainWindow {
     QMenu* _encrypt_menu;
     QMenu* _decrypt_menu;
     QString (*_cur_method)(const QString&, int);
+    QFile _file;
+    QSaveFile* _save_file;
 
     std::optional<QString> _last_string;
     QString _current_file;
