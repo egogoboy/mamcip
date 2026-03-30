@@ -45,6 +45,7 @@ void UI::initWidgets() {
             wrong_message->setAttribute(Qt::WA_DeleteOnClose);
             wrong_message->setInformativeText("Значение ключа неправильное");
             wrong_message->show();
+            wrong_message->setIcon(QMessageBox::Critical);
             _key_input_dialog->show();
         } else {
             _key_input_dialog->setTextValue("");
@@ -125,7 +126,17 @@ void UI::createTemporaryFile() {
 }
 
 void UI::showNotImplementedWarning() {
-    QMessageBox::warning(this, "", "Указанный метод не реализован");
+    QMessageBox* warn = new QMessageBox(_window);
+    warn->setIcon(QMessageBox::Warning);
+    warn->setStandardButtons(QMessageBox::NoButton);
+    warn->setInformativeText("Указанный метод не реализован");
+
+    QPushButton* cancel_button =
+        warn->addButton(QMessageBox::StandardButton::Cancel);
+    cancel_button->hide();
+    warn->setEscapeButton(cancel_button);
+
+    warn->show();
 }
 
 void UI::showAbout() {
