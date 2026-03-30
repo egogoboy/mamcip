@@ -19,8 +19,12 @@ UI::UI(size_t height, size_t width) {
 }
 
 void UI::initLayout() {
+    _layout = new QVBoxLayout(_window);
+    _layout->setAlignment(Qt::AlignTop);
     _input_line = new QLineEdit(_window);
     _input_line->setValidator(_input_text_validator);
+    _layout->addWidget(_input_line);
+    setLayout(_layout);
 }
 
 void UI::initValidator() {
@@ -36,6 +40,17 @@ void UI::initWidgets() {
     _key_input_dialog->setInputMode(QInputDialog::TextInput);
     _key_input_dialog->setOkButtonText("OK");
     _key_input_dialog->setCancelButtonText("ESC");
+    connect(_key_input_dialog, &QDialog::accepted, this, [&]() {
+        QLineEdit* line = new QLineEdit(_window);
+        line->setReadOnly(true);
+        if (!_last_string.has_value()) {
+            _last_string = _input_line->text();
+            _input_line->setReadOnly(true);
+        }
+        _last_string = _cur_method(_last_string.value(), askKey());
+        line->setText(_last_string.value());
+        _layout->addWidget(line);
+    });
 }
 
 void UI::initMenuBar() {
@@ -114,19 +129,13 @@ int UI::askKey() {
 }
 
 void UI::encode() {
-    disconnect(_cur_method);
-    _cur_method = connect(_key_input_dialog, &QDialog::accepted, this, [&]() {
-        _input_line->setText(encoding::encode(_input_line->text(), askKey()));
-    });
+    _cur_method = encoding::encode;
     _key_input_dialog->setTextValue("");
     _key_input_dialog->show();
 }
 
 void UI::decode() {
-    disconnect(_cur_method);
-    _cur_method = connect(_key_input_dialog, &QDialog::accepted, this, [&]() {
-        _input_line->setText(encoding::decode(_input_line->text(), askKey()));
-    });
+    _cur_method = encoding::decode;
     _key_input_dialog->setTextValue("");
     _key_input_dialog->show();
 }

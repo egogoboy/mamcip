@@ -26,15 +26,16 @@ class UI : public QMainWindow {
     int askKey();
 
     QWidget* _window;
+    QVBoxLayout* _layout;
     QValidator* _input_text_validator;
     QValidator* _key_validator;
     QLineEdit* _input_line;
     QInputDialog* _key_input_dialog;
     QMenu* _encrypt_menu;
     QMenu* _decrypt_menu;
-    QMetaObject::Connection _cur_method;
+    QString (*_cur_method)(const QString&, int);
 
-    QString _last_string;
+    std::optional<QString> _last_string;
     QString _current_file;
 
     const QString ABOUT_MESSAGE = R"(
