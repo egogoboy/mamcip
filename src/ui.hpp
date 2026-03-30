@@ -14,6 +14,8 @@ class UI : public QMainWindow {
     void showAbout();
     void showHelp();
     void askKey();
+    void openFile();
+    void createTemporaryFile();
 
    private:
     void initMenuBar();
@@ -25,6 +27,10 @@ class UI : public QMainWindow {
     QValidator* _key_validator;
     QLineEdit* _input_line;
     QInputDialog* _key_input_dialog;
+    QMenu* _encrypt_menu;
+    QMenu* _decrypt_menu;
+
+    QString _current_file;
 
     const QString ABOUT_MESSAGE = R"(
 Шифрование методами подстановки

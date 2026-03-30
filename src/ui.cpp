@@ -33,8 +33,11 @@ void UI::initMenuBar() {
     menuBar()->setNativeMenuBar(false);
 
     QMenu* fileMenu = menuBar()->addMenu(QObject::tr("Файл"));
-    fileMenu->addAction("Создать");
-    fileMenu->addAction("Открыть");
+    connectedAction = fileMenu->addAction("Создать");
+    connect(connectedAction, &QAction::triggered, this,
+            &UI::createTemporaryFile);
+    connectedAction = fileMenu->addAction("Открыть");
+    connect(connectedAction, &QAction::triggered, this, &UI::openFile);
     fileMenu->addAction("Сохранить");
     fileMenu->addAction("Сохранить как");
     QAction* nonInteractiveAction = fileMenu->addAction("");
@@ -42,25 +45,26 @@ void UI::initMenuBar() {
     connectedAction = fileMenu->addAction("Выход");
     connect(connectedAction, &QAction::triggered, this, &QApplication::quit);
 
-    QMenu* encryptMenu = menuBar()->addMenu(QObject::tr("Зашифровать"));
-    connectedAction = encryptMenu->addAction("Моноалфавитная");
+    _encrypt_menu = menuBar()->addMenu(QObject::tr("Зашифровать"));
+    connectedAction = _encrypt_menu->addAction("Моноалфавитная");
     connect(connectedAction, &QAction::triggered, this, &UI::askKey);
     notImplementedActions.emplace_back(
-        encryptMenu->addAction("Гомофоническая"));
+        _encrypt_menu->addAction("Гомофоническая"));
     notImplementedActions.emplace_back(
-        encryptMenu->addAction("Полиалфавитная"));
-    notImplementedActions.emplace_back(encryptMenu->addAction("Полиграммная"));
-    encryptMenu->setEnabled(false);
+        _encrypt_menu->addAction("Полиалфавитная"));
+    notImplementedActions.emplace_back(
+        _encrypt_menu->addAction("Полиграммная"));
+    _encrypt_menu->setEnabled(false);
 
-    QMenu* decryptMenu = menuBar()->addMenu(QObject::tr("Дешифровать"));
-    decryptMenu->addAction("Моноалфавитная");
+    _decrypt_menu = menuBar()->addMenu(QObject::tr("Дешифровать"));
+    _decrypt_menu->addAction("Моноалфавитная");
     notImplementedActions.emplace_back(
-        decryptMenu->addAction("Гомофоническая"));
+        _decrypt_menu->addAction("Гомофоническая"));
     notImplementedActions.emplace_back(
-        decryptMenu->addAction("Полиалфавитная"));
-    notImplementedActions.emplace_back(decryptMenu->addAction("Полиграммная"));
-    decryptMenu->setEnabled(false);
-    decryptMenu->setStyleSheet("color: red");
+        _decrypt_menu->addAction("Полиалфавитная"));
+    notImplementedActions.emplace_back(
+        _decrypt_menu->addAction("Полиграммная"));
+    _decrypt_menu->setEnabled(false);
 
     QMenu* infoMenu = menuBar()->addMenu(QObject::tr("Справка"));
     connectedAction = infoMenu->addAction("О программе");
@@ -79,22 +83,35 @@ void UI::initMenuBar() {
 
 void UI::askKey() {
     bool ok;
-    do {
-        QString key =
-            QInputDialog::getText(this, "Ключ", "", QLineEdit::Normal, "", &ok);
+    _key_input_dialog = new QInputDialog(_window);
+    _key_input_dialog->setCancelButtonText("Отмена");
 
-        int pos = 0;
+    QString key =
+        QInputDialog::getText(this, "Ключ", "", QLineEdit::Normal, "", &ok);
 
-        ok = ok &&
-             _key_validator->validate(key, pos) == QIntValidator::Acceptable;
+    int pos = 0;
 
-        QMessageBox* msg;
-        if (ok && !key.isEmpty()) {
-            QMessageBox::information(this, "Key", key);
-        } else {
-            QMessageBox::warning(this, "", "Значение ключа неправильное");
-        }
-    } while (!ok);
+    ok = ok && _key_validator->validate(key, pos) == QIntValidator::Acceptable;
+
+    QMessageBox* msg;
+    if (ok && !key.isEmpty()) {
+        QMessageBox::information(this, "Key", key);
+    } else {
+        QMessageBox::warning(this, "", "Значение ключа неправильное");
+    }
+}
+
+void UI::openFile() {
+    _current_file = QFileDialog::getOpenFileName(this, tr("Открыть файл"), ".",
+                                                 tr("Text Files (*.txt)"));
+    _encrypt_menu->setEnabled(true);
+    _decrypt_menu->setEnabled(true);
+}
+
+void UI::createTemporaryFile() {
+    _current_file = "Новый файл";
+    _encrypt_menu->setEnabled(true);
+    _decrypt_menu->setEnabled(true);
 }
 
 void UI::showNotImplementedWarning() {
