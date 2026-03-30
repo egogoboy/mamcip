@@ -13,7 +13,8 @@ class UI : public QMainWindow {
     void showNotImplementedWarning();
     void showAbout();
     void showHelp();
-    void askKey();
+    void encode();
+    void decode();
     void openFile();
     void createTemporaryFile();
 
@@ -22,6 +23,7 @@ class UI : public QMainWindow {
     void initLayout();
     void initValidator();
     void initWidgets();
+    int askKey();
 
     QWidget* _window;
     QValidator* _input_text_validator;
@@ -30,7 +32,9 @@ class UI : public QMainWindow {
     QInputDialog* _key_input_dialog;
     QMenu* _encrypt_menu;
     QMenu* _decrypt_menu;
+    QMetaObject::Connection _cur_method;
 
+    QString _last_string;
     QString _current_file;
 
     const QString ABOUT_MESSAGE = R"(

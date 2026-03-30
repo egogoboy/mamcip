@@ -2,6 +2,8 @@
 
 #include <QtWidgets>
 
+#include "encoding.cpp"
+
 UI::UI(size_t height, size_t width) {
     resize(width, height);
     setWindowTitle("Шифрование методами подстановки");
@@ -34,24 +36,6 @@ void UI::initWidgets() {
     _key_input_dialog->setInputMode(QInputDialog::TextInput);
     _key_input_dialog->setOkButtonText("OK");
     _key_input_dialog->setCancelButtonText("ESC");
-
-    connect(_key_input_dialog, &QDialog::accepted, this, [&]() {
-        QString key = _key_input_dialog->textValue();
-
-        int pos = 0;
-        if (!_key_validator->validate(key, pos)) {
-            QMessageBox* wrong_message = new QMessageBox(_window);
-            wrong_message->setModal(true);
-            wrong_message->setAttribute(Qt::WA_DeleteOnClose);
-            wrong_message->setInformativeText("Значение ключа неправильное");
-            wrong_message->show();
-            wrong_message->setIcon(QMessageBox::Critical);
-            _key_input_dialog->show();
-        } else {
-            _key_input_dialog->setTextValue("");
-            _key_input_dialog->hide();
-        }
-    });
 }
 
 void UI::initMenuBar() {
@@ -75,7 +59,7 @@ void UI::initMenuBar() {
 
     _encrypt_menu = menuBar()->addMenu(QObject::tr("Зашифровать"));
     connectedAction = _encrypt_menu->addAction("Моноалфавитная");
-    connect(connectedAction, &QAction::triggered, this, &UI::askKey);
+    connect(connectedAction, &QAction::triggered, this, &UI::encode);
     notImplementedActions.emplace_back(
         _encrypt_menu->addAction("Гомофоническая"));
     notImplementedActions.emplace_back(
@@ -86,7 +70,7 @@ void UI::initMenuBar() {
 
     _decrypt_menu = menuBar()->addMenu(QObject::tr("Дешифровать"));
     connectedAction = _decrypt_menu->addAction("Моноалфавитная");
-    connect(connectedAction, &QAction::triggered, this, &UI::askKey);
+    connect(connectedAction, &QAction::triggered, this, &UI::decode);
     notImplementedActions.emplace_back(
         _decrypt_menu->addAction("Гомофоническая"));
     notImplementedActions.emplace_back(
@@ -110,7 +94,42 @@ void UI::initMenuBar() {
     }
 }
 
-void UI::askKey() { _key_input_dialog->show(); }
+int UI::askKey() {
+    QString key = _key_input_dialog->textValue();
+
+    int pos = 0;
+    if (_key_validator->validate(key, pos)) {
+        _key_input_dialog->hide();
+    } else {
+        QMessageBox* wrong_message = new QMessageBox(_window);
+        wrong_message->setModal(true);
+        wrong_message->setAttribute(Qt::WA_DeleteOnClose);
+        wrong_message->setInformativeText("Значение ключа неправильное");
+        wrong_message->show();
+        wrong_message->setIcon(QMessageBox::Critical);
+        _key_input_dialog->show();
+    }
+
+    return key.toInt();
+}
+
+void UI::encode() {
+    disconnect(_cur_method);
+    _cur_method = connect(_key_input_dialog, &QDialog::accepted, this, [&]() {
+        _input_line->setText(encoding::encode(_input_line->text(), askKey()));
+    });
+    _key_input_dialog->setTextValue("");
+    _key_input_dialog->show();
+}
+
+void UI::decode() {
+    disconnect(_cur_method);
+    _cur_method = connect(_key_input_dialog, &QDialog::accepted, this, [&]() {
+        _input_line->setText(encoding::decode(_input_line->text(), askKey()));
+    });
+    _key_input_dialog->setTextValue("");
+    _key_input_dialog->show();
+}
 
 void UI::openFile() {
     _current_file = QFileDialog::getOpenFileName(this, tr("Открыть файл"), ".",
