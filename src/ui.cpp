@@ -52,12 +52,15 @@ void UI::initWidgets() {
     _key_input_dialog->setCancelButtonText("ESC");
 
     connect(_key_input_dialog, &QDialog::accepted, this, [&]() {
-        _lines.top().setReadOnly(true);
-        QString text = _lines.top().text();
-        _lines.emplace(_window);
-        _lines.top().setReadOnly(true);
-        _lines.top().setText(_cur_method(text, askKey()));
-        _layout->addWidget(&_lines.top());
+        std::optional<int> key = askKey();
+        if (key.has_value()) {
+            _lines.top().setReadOnly(true);
+            QString text = _lines.top().text();
+            _lines.emplace(_window);
+            _lines.top().setReadOnly(true);
+            _lines.top().setText(_cur_method(text, key.value()));
+            _layout->addWidget(&_lines.top());
+        }
     });
 }
 
@@ -120,7 +123,7 @@ void UI::initMenuBar() {
     }
 }
 
-int UI::askKey() {
+std::optional<int> UI::askKey() {
     QString key = _key_input_dialog->textValue();
 
     int pos = 0;
@@ -134,6 +137,7 @@ int UI::askKey() {
         wrong_message->show();
         wrong_message->setIcon(QMessageBox::Critical);
         _key_input_dialog->show();
+        return std::nullopt;
     }
 
     return key.toInt();
@@ -188,6 +192,7 @@ void UI::saveFileAs() {
     _file.setFileName(QFileDialog::getSaveFileName(
         _window, tr("Сохранить как"), "Новый файл.txt", tr("All Files (*)")));
     saveFile();
+    _save_action->setEnabled(true);
 }
 
 void UI::saveFile() {

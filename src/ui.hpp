@@ -28,7 +28,7 @@ class UI : public QMainWindow {
     void resetLayout();
     void initValidator();
     void initWidgets();
-    int askKey();
+    std::optional<int> askKey();
 
     QWidget* _window;
     QVBoxLayout* _layout;
