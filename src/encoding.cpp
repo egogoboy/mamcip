@@ -2,7 +2,7 @@
 
 namespace encoding {
 
-const QString alphabet = "_АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЭЮЯ";
+const QString alphabet = "_АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
 
 size_t get_char_idx(QChar c) { return alphabet.indexOf(c); }
 
