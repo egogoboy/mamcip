@@ -74,6 +74,7 @@ void UI::initMenuBar() {
     connectedAction = fileMenu->addAction("Открыть");
     connect(connectedAction, &QAction::triggered, this, &UI::openFile);
     _save_action = fileMenu->addAction("Сохранить");
+    _save_action->setEnabled(false);
     connect(_save_action, &QAction::triggered, this, &UI::saveFile);
     connectedAction = fileMenu->addAction("Сохранить как");
     connect(connectedAction, &QAction::triggered, this, &UI::saveFileAs);
