@@ -73,8 +73,8 @@ void UI::initMenuBar() {
             &UI::createTemporaryFile);
     connectedAction = fileMenu->addAction("Открыть");
     connect(connectedAction, &QAction::triggered, this, &UI::openFile);
-    connectedAction = fileMenu->addAction("Сохранить");
-    connect(connectedAction, &QAction::triggered, this, &UI::saveFile);
+    _save_action = fileMenu->addAction("Сохранить");
+    connect(_save_action, &QAction::triggered, this, &UI::saveFile);
     connectedAction = fileMenu->addAction("Сохранить как");
     connect(connectedAction, &QAction::triggered, this, &UI::saveFileAs);
     QAction* nonInteractiveAction = fileMenu->addAction("");
@@ -156,6 +156,8 @@ void UI::openFile() {
     _file.setFileName(_current_file);
     _encrypt_menu->setEnabled(true);
     _decrypt_menu->setEnabled(true);
+    _save_action->setEnabled(true);
+
     resetLayout();
     readContentFromFile();
 }
@@ -171,11 +173,12 @@ void UI::readContentFromFile() {
     QTextStream in(&_file);
     in >> input_text;
     _lines.top().setText(input_text);
+    _file.close();
 }
 
 void UI::createTemporaryFile() {
     resetLayout();
-    _file.setFileName("Новый файл");
+    _save_action->setEnabled(false);
     _encrypt_menu->setEnabled(true);
     _decrypt_menu->setEnabled(true);
 }

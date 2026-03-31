@@ -35,6 +35,7 @@ class UI : public QMainWindow {
     QValidator* _input_text_validator;
     QValidator* _key_validator;
     QInputDialog* _key_input_dialog;
+    QAction* _save_action;
     QMenu* _encrypt_menu;
     QMenu* _decrypt_menu;
     QString (*_cur_method)(const QString&, int);
