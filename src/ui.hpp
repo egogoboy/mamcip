@@ -2,6 +2,7 @@
 
 #include <QtWidgets>
 #include <cstdlib>
+#include <stack>
 
 class UI : public QMainWindow {
     Q_OBJECT
@@ -19,10 +20,12 @@ class UI : public QMainWindow {
     void createTemporaryFile();
     void saveFile();
     void saveFileAs();
+    void readContentFromFile();
 
    private:
     void initMenuBar();
     void initLayout();
+    void resetLayout();
     void initValidator();
     void initWidgets();
     int askKey();
@@ -31,15 +34,14 @@ class UI : public QMainWindow {
     QVBoxLayout* _layout;
     QValidator* _input_text_validator;
     QValidator* _key_validator;
-    QLineEdit* _input_line;
     QInputDialog* _key_input_dialog;
     QMenu* _encrypt_menu;
     QMenu* _decrypt_menu;
     QString (*_cur_method)(const QString&, int);
     QFile _file;
-    QSaveFile* _save_file;
+    bool _file_opened = false;
+    std::stack<QLineEdit> _lines;
 
-    std::optional<QString> _last_string;
     QString _current_file;
 
     const QString ABOUT_MESSAGE = R"(

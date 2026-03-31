@@ -12,11 +12,9 @@ UI::UI(size_t height, size_t width) {
     _window = new QWidget(this);
     setCentralWidget(_window);
 
-    _save_file = new QSaveFile(_window);
-
+    initLayout();
     initMenuBar();
     initValidator();
-    initLayout();
     initWidgets();
 
     show();
@@ -25,10 +23,18 @@ UI::UI(size_t height, size_t width) {
 void UI::initLayout() {
     _layout = new QVBoxLayout(_window);
     _layout->setAlignment(Qt::AlignTop);
-    _input_line = new QLineEdit(_window);
-    _input_line->setValidator(_input_text_validator);
-    _layout->addWidget(_input_line);
     setLayout(_layout);
+}
+
+void UI::resetLayout() {
+    while (!_lines.empty()) {
+        _layout->removeWidget(&_lines.top());
+        _lines.pop();
+    }
+
+    _lines.emplace(_window);
+    _lines.top().setValidator(_input_text_validator);
+    _layout->addWidget(&_lines.top());
 }
 
 void UI::initValidator() {
@@ -44,16 +50,14 @@ void UI::initWidgets() {
     _key_input_dialog->setInputMode(QInputDialog::TextInput);
     _key_input_dialog->setOkButtonText("OK");
     _key_input_dialog->setCancelButtonText("ESC");
+
     connect(_key_input_dialog, &QDialog::accepted, this, [&]() {
-        QLineEdit* line = new QLineEdit(_window);
-        line->setReadOnly(true);
-        if (!_last_string.has_value()) {
-            _last_string = _input_line->text();
-            _input_line->setReadOnly(true);
-        }
-        _last_string = _cur_method(_last_string.value(), askKey());
-        line->setText(_last_string.value());
-        _layout->addWidget(line);
+        _lines.top().setReadOnly(true);
+        QString text = _lines.top().text();
+        _lines.emplace(_window);
+        _lines.top().setReadOnly(true);
+        _lines.top().setText(_cur_method(text, askKey()));
+        _layout->addWidget(&_lines.top());
     });
 }
 
@@ -149,20 +153,36 @@ void UI::decode() {
 void UI::openFile() {
     _current_file = QFileDialog::getOpenFileName(this, tr("Открыть файл"), ".",
                                                  tr("Text Files (*.txt)"));
-    _save_file->setFileName(_current_file);
+    _file.setFileName(_current_file);
     _encrypt_menu->setEnabled(true);
     _decrypt_menu->setEnabled(true);
+    resetLayout();
+    readContentFromFile();
+}
+
+void UI::readContentFromFile() {
+    if (!_file.open(QIODevice::ReadWrite | QIODevice::Text)) {
+        QMessageBox::information(this, tr("Не удалось открыть файл"),
+                                 _file.errorString());
+        return;
+    }
+
+    QString input_text;
+    QTextStream in(&_file);
+    in >> input_text;
+    _lines.top().setText(input_text);
 }
 
 void UI::createTemporaryFile() {
+    resetLayout();
     _file.setFileName("Новый файл");
     _encrypt_menu->setEnabled(true);
     _decrypt_menu->setEnabled(true);
 }
 
 void UI::saveFileAs() {
-    _file.setFileName(QFileDialog::getSaveFileName(_window, tr("Сохранить как"),
-                                                   "", tr("All Files (*)")));
+    _file.setFileName(QFileDialog::getSaveFileName(
+        _window, tr("Сохранить как"), "Новый файл.txt", tr("All Files (*)")));
     saveFile();
 }
 
@@ -174,7 +194,7 @@ void UI::saveFile() {
     }
 
     QTextStream out(&_file);
-    out << _last_string.value();
+    out << _lines.top().text();
     _file.close();
 }
 
