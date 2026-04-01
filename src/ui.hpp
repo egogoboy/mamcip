@@ -21,8 +21,7 @@ class UI : public QMainWindow {
     void saveFile();
     void saveFileAs();
     void readContentFromFile();
-    void enableWorkspace();
-    void enableHelp();
+    void onWorkspaceEdit();
 
    private:
     class CustomTextEdit : public QTextEdit {

@@ -26,7 +26,7 @@ void UI::initLayout() {
     _workspace->setAlignment(Qt::AlignmentFlag::AlignTop);
     _workspace->setVisible(false);
     _workspace->setReadOnly(true);
-    connect(_workspace, &QTextEdit::textChanged, this, &UI::enableHelp);
+    connect(_workspace, &QTextEdit::textChanged, this, &UI::onWorkspaceEdit);
     setLayout(_layout);
 }
 
@@ -38,14 +38,6 @@ void UI::resetWorkspace() {
     _workspace->setText("");
     _workspace->setVisible(true);
     _workspace->setReadOnly(false);
-
-    _save_action->setEnabled(true);
-    _encrypt_menu->setEnabled(true);
-    _decrypt_menu->setEnabled(true);
-    _workspace->setVisible(true);
-    _workspace->setReadOnly(false);
-
-    _show_help_action->setEnabled(false);
 }
 
 void UI::initValidator() {
@@ -175,6 +167,7 @@ void UI::openFile() {
 
     resetWorkspace();
     readContentFromFile();
+    _save_action->setEnabled(true);
 }
 
 void UI::createFile() {
@@ -202,7 +195,6 @@ void UI::saveFileAs() {
     _file.setFileName(QFileDialog::getSaveFileName(
         _window, tr("Сохранить как"), "Новый файл.txt", tr("All Files (*)")));
     saveFile();
-    _save_action->setEnabled(true);
 }
 
 void UI::readContentFromFile() {
@@ -219,8 +211,6 @@ void UI::readContentFromFile() {
     _workspace->setText(input_text);
     _file.close();
 }
-
-void UI::enableWorkspace() {}
 
 void UI::showNotImplementedWarning() {
     QMessageBox* warn = new QMessageBox(_window);
@@ -243,4 +233,14 @@ void UI::showAbout() {
 
 void UI::showHelp() { QMessageBox::information(this, "", HELP_MESSAGE); }
 
-void UI::enableHelp() { _show_help_action->setEnabled(true); }
+void UI::onWorkspaceEdit() {
+    if (_workspace->toPlainText().isEmpty()) {
+        _encrypt_menu->setEnabled(false);
+        _decrypt_menu->setEnabled(false);
+        _show_help_action->setEnabled(false);
+    } else {
+        _encrypt_menu->setEnabled(true);
+        _decrypt_menu->setEnabled(true);
+        _show_help_action->setEnabled(true);
+    }
+}
