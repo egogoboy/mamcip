@@ -10,6 +10,7 @@ UI::UI(size_t height, size_t width) {
 
     _window = new QWidget(this);
     setCentralWidget(_window);
+    _help_window = std::make_unique<HelpWindow>();
 
     initLayout();
     initMenuBar();
@@ -230,7 +231,10 @@ void UI::showAbout() {
     QMessageBox::information(this, "О программе", ABOUT_MESSAGE);
 }
 
-void UI::showHelp() { QMessageBox::information(this, "", HELP_MESSAGE); }
+void UI::showHelp() {
+    _help_window->show();
+    _help_window->activateWindow();
+}
 
 void UI::onWorkspaceEdit() {
     if (_workspace->toPlainText().isEmpty()) {
