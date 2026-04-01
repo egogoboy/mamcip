@@ -13,8 +13,8 @@ find_package(Qt5 COMPONENTS Widgets REQUIRED)
 
 add_executable(app
     WIN32
-    src/main.cpp
-    src/ui.cpp
+    main.cpp
+    ui.cpp
 )
 
 target_link_libraries(app PRIVATE Qt5::Widgets)
