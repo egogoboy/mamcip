@@ -2,6 +2,6 @@
 
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
-    UI ui(1000, 800);
+    UI ui(400, 600);
     return app.exec();
 }
