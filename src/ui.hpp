@@ -22,6 +22,7 @@ class UI : public QMainWindow {
     void saveFileAs();
     void readContentFromFile();
     void enableWorkspace();
+    void enableHelp();
 
    private:
     class CustomTextEdit : public QTextEdit {

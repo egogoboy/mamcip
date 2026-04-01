@@ -26,6 +26,7 @@ void UI::initLayout() {
     _workspace->setAlignment(Qt::AlignmentFlag::AlignTop);
     _workspace->setVisible(false);
     _workspace->setReadOnly(true);
+    connect(_workspace, &QTextEdit::textChanged, this, &UI::enableHelp);
     setLayout(_layout);
 }
 
@@ -157,14 +158,12 @@ std::optional<int> UI::askKey() {
 }
 
 void UI::encode() {
-    _show_help_action->setEnabled(true);
     _cur_method = encoding::encode;
     _key_input_dialog->setTextValue("");
     _key_input_dialog->show();
 }
 
 void UI::decode() {
-    _show_help_action->setEnabled(true);
     _cur_method = encoding::decode;
     _key_input_dialog->setTextValue("");
     _key_input_dialog->show();
@@ -243,3 +242,5 @@ void UI::showAbout() {
 }
 
 void UI::showHelp() { QMessageBox::information(this, "", HELP_MESSAGE); }
+
+void UI::enableHelp() { _show_help_action->setEnabled(true); }
