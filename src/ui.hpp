@@ -32,13 +32,10 @@ class UI : public QMainWindow {
         void keyPressEvent(QKeyEvent* event) override {
             if (event->key() == Qt::Key_Backspace) {
                 QTextEdit::keyPressEvent(event);
-            }
-
-            if (event->text().contains(QRegExp("[^А-ИК-Я_\b]"))) {
                 return;
             }
 
-            if (toPlainText().size() >= 30) {
+            if (event->text().contains(QRegExp("[^А-ИК-Я_\b]")) || toPlainText().size() >= 30) {
                 return;
             }
 
