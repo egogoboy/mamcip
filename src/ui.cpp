@@ -1,7 +1,6 @@
 #include "ui.hpp"
 
 #include <QtWidgets>
-#include <iostream>
 
 #include "encoding.cpp"
 
@@ -46,7 +45,8 @@ void UI::initValidator() {
 void UI::initWidgets() {
     _key_input_dialog = new QInputDialog(_window);
     _key_input_dialog->setWindowFlag(Qt::WindowStaysOnTopHint);
-    _key_input_dialog->setLabelText("Введите ключ шифрования");
+    _key_input_dialog->setWindowTitle("Ключ");
+    _key_input_dialog->setLabelText("");
     _key_input_dialog->setInputMode(QInputDialog::TextInput);
     _key_input_dialog->setOkButtonText("OK");
     _key_input_dialog->setCancelButtonText("ESC");
@@ -97,7 +97,7 @@ void UI::initMenuBar() {
         _encrypt_menu->addAction("Полиграммная"));
     _encrypt_menu->setEnabled(false);
 
-    _decrypt_menu = menuBar()->addMenu(QObject::tr("Дешифровать"));
+    _decrypt_menu = menuBar()->addMenu(QObject::tr("Расшифровать"));
     connectedAction = _decrypt_menu->addAction("Моноалфавитная");
     connect(connectedAction, &QAction::triggered, this, &UI::decode);
     notImplementedActions.emplace_back(
@@ -111,8 +111,9 @@ void UI::initMenuBar() {
     QMenu* infoMenu = menuBar()->addMenu(QObject::tr("Справка"));
     connectedAction = infoMenu->addAction("О программе");
     connect(connectedAction, &QAction::triggered, this, &UI::showAbout);
-    connectedAction = infoMenu->addAction("Помощь");
-    connect(connectedAction, &QAction::triggered, this, &UI::showHelp);
+    _show_help_action = infoMenu->addAction("Помощь");
+    connect(_show_help_action, &QAction::triggered, this, &UI::showHelp);
+    _show_help_action->setEnabled(false);
 
     connectedAction = menuBar()->addAction(QObject::tr("Выход"));
     connect(connectedAction, &QAction::triggered, this, &QApplication::quit);
@@ -127,16 +128,17 @@ std::optional<int> UI::askKey() {
     QString key = _key_input_dialog->textValue();
 
     int pos = 0;
-    if (_key_validator->validate(key, pos)) {
+    if (_key_validator->validate(key, pos) && !key.isEmpty()) {
         _key_input_dialog->hide();
     } else {
+        _key_input_dialog->show();
         QMessageBox* wrong_message = new QMessageBox(_window);
         wrong_message->setModal(true);
         wrong_message->setAttribute(Qt::WA_DeleteOnClose);
+        wrong_message->setWindowTitle("");
         wrong_message->setInformativeText("Значение ключа неправильное");
         wrong_message->show();
         wrong_message->setIcon(QMessageBox::Critical);
-        _key_input_dialog->show();
         return std::nullopt;
     }
 
@@ -144,12 +146,16 @@ std::optional<int> UI::askKey() {
 }
 
 void UI::encode() {
+    _show_help_action->setEnabled(true);
+    _help_text = HELP_MESSAGE_ENCODE;
     _cur_method = encoding::encode;
     _key_input_dialog->setTextValue("");
     _key_input_dialog->show();
 }
 
 void UI::decode() {
+    _show_help_action->setEnabled(true);
+    _help_text = HELP_MESSAGE_DECODE;
     _cur_method = encoding::decode;
     _key_input_dialog->setTextValue("");
     _key_input_dialog->show();
@@ -211,6 +217,7 @@ void UI::showNotImplementedWarning() {
     QMessageBox* warn = new QMessageBox(_window);
     warn->setIcon(QMessageBox::Warning);
     warn->setStandardButtons(QMessageBox::NoButton);
+    warn->setWindowTitle("");
     warn->setInformativeText("Указанный метод не реализован");
 
     QPushButton* cancel_button =
@@ -225,4 +232,4 @@ void UI::showAbout() {
     QMessageBox::information(this, "О программе", ABOUT_MESSAGE);
 }
 
-void UI::showHelp() { QMessageBox::information(this, "Помощь", HELP_MESSAGE); }
+void UI::showHelp() { QMessageBox::information(this, "", _help_text); }

@@ -36,6 +36,7 @@ class UI : public QMainWindow {
     QValidator* _key_validator;
     QInputDialog* _key_input_dialog;
     QAction* _save_action;
+    QAction* _show_help_action;
     QMenu* _encrypt_menu;
     QMenu* _decrypt_menu;
     QString (*_cur_method)(const QString&, int);
@@ -44,6 +45,7 @@ class UI : public QMainWindow {
     std::stack<QLineEdit> _lines;
 
     QString _current_file;
+    QString _help_text;
 
     const QString ABOUT_MESSAGE = R"(
 Шифрование методами подстановки
@@ -52,7 +54,20 @@ class UI : public QMainWindow {
 
 Судаков Е.Ю., ИПБ-23)";
 
-    const QString HELP_MESSAGE = R"(
-Not implemented
-    )";
+    const QString HELP_MESSAGE_ENCODE = R"(
+1. Ввести открытый текст с клавиатуры или загрузить из файла
+2. Выбрать метод зашифрования в выпадающем меню  
+3. Выбрать из выпадающего списка ключ, используемый при зашифровании
+
+Описание моноалфавитного метода.
+Каждой букве алфавита открытого текста ставится в соответствие одна буква закрытого текста из этого же алфавита.
+)";
+    const QString HELP_MESSAGE_DECODE = R"(
+1. Ввести или загрузить шифротекст из файла
+2. Выбрать метод расшифрования в выпадающем меню  
+3. Выбрать из выпадающего списка ключ, используемый при расшифровании
+
+Описание моноалфавитного метода.
+Каждой букве алфавита открытого текста ставится в соответствие одна буква закрытого текста из этого же алфавита.
+)";
 };
