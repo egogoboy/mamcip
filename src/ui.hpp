@@ -31,18 +31,26 @@ class UI : public QMainWindow {
     std::optional<int> askKey();
 
     QWidget* _window;
-    QVBoxLayout* _layout;
+    QStackedLayout* _layout;
+    QTextEdit* _workspace;
+
     QValidator* _input_text_validator;
     QValidator* _key_validator;
+
     QInputDialog* _key_input_dialog;
+
     QAction* _save_action;
     QAction* _show_help_action;
+
     QMenu* _encrypt_menu;
     QMenu* _decrypt_menu;
+
     QString (*_cur_method)(const QString&, int);
+
     QFile _file;
+
     bool _file_opened = false;
-    std::stack<QLineEdit> _lines;
+    std::stack<QString> _lines;
 
     QString _current_file;
     QString _help_text;

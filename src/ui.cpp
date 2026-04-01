@@ -20,48 +20,30 @@ UI::UI(size_t height, size_t width) {
 }
 
 void UI::initLayout() {
-    _layout = new QVBoxLayout(_window);
-    _layout->setAlignment(Qt::AlignTop);
+    _layout = new QStackedLayout(_window);
+    _workspace = new QTextEdit(_window);
+    _layout->addWidget(_workspace);
+    _workspace->setAlignment(Qt::AlignmentFlag::AlignTop);
+    _workspace->setVisible(false);
+    _workspace->setReadOnly(true);
+    // _workspace->valid;
     setLayout(_layout);
 }
 
 void UI::resetLayout() {
     while (!_lines.empty()) {
-        _layout->removeWidget(&_lines.top());
         _lines.pop();
     }
 
-    _lines.emplace(_window);
-    _lines.top().setValidator(_input_text_validator);
-    _layout->addWidget(&_lines.top());
+    _workspace->setText("");
+    _workspace->setVisible(true);
+    _workspace->setReadOnly(false);
 }
 
 void UI::initValidator() {
     QRegularExpression rx("(?(?=[А-Я_])[^Й]|^$){0,30}");
     _input_text_validator = new QRegularExpressionValidator(rx, _window);
     _key_validator = new QIntValidator(0, 1000, _window);
-}
-
-void UI::initWidgets() {
-    _key_input_dialog = new QInputDialog(_window);
-    _key_input_dialog->setWindowFlag(Qt::WindowStaysOnTopHint);
-    _key_input_dialog->setWindowTitle("Ключ");
-    _key_input_dialog->setLabelText("");
-    _key_input_dialog->setInputMode(QInputDialog::TextInput);
-    _key_input_dialog->setOkButtonText("OK");
-    _key_input_dialog->setCancelButtonText("ESC");
-
-    connect(_key_input_dialog, &QDialog::accepted, this, [&]() {
-        std::optional<int> key = askKey();
-        if (key.has_value()) {
-            _lines.top().setReadOnly(true);
-            QString text = _lines.top().text();
-            _lines.emplace(_window);
-            _lines.top().setReadOnly(true);
-            _lines.top().setText(_cur_method(text, key.value()));
-            _layout->addWidget(&_lines.top());
-        }
-    });
 }
 
 void UI::initMenuBar() {
@@ -124,6 +106,31 @@ void UI::initMenuBar() {
     }
 }
 
+void UI::initWidgets() {
+    _key_input_dialog = new QInputDialog(_window);
+    _key_input_dialog->setWindowFlag(Qt::WindowStaysOnTopHint);
+    _key_input_dialog->setWindowTitle("Ключ");
+    _key_input_dialog->setLabelText("");
+    _key_input_dialog->setInputMode(QInputDialog::TextInput);
+    _key_input_dialog->setOkButtonText("OK");
+    _key_input_dialog->setCancelButtonText("ESC");
+
+    connect(_key_input_dialog, &QDialog::accepted, this, [&]() {
+        std::optional<int> key = askKey();
+        if (key.has_value()) {
+            if (_lines.empty()) {
+                _lines.emplace(_workspace->toPlainText());
+            }
+            QString text = _lines.top();
+
+            _lines.emplace(_cur_method(text, key.value()));
+            // _workspace->setText(_workspace->toPlainText() + "\n" + text);
+            _workspace->insertPlainText("\n" + text);
+            _workspace->setReadOnly(true);
+        }
+    });
+}
+
 std::optional<int> UI::askKey() {
     QString key = _key_input_dialog->textValue();
 
@@ -165,12 +172,24 @@ void UI::openFile() {
     _current_file = QFileDialog::getOpenFileName(this, tr("Открыть файл"), ".",
                                                  tr("Text Files (*.txt)"));
     _file.setFileName(_current_file);
-    _encrypt_menu->setEnabled(true);
-    _decrypt_menu->setEnabled(true);
-    _save_action->setEnabled(true);
 
     resetLayout();
+    _save_action->setEnabled(true);
+    _encrypt_menu->setEnabled(true);
+    _decrypt_menu->setEnabled(true);
+    _workspace->setVisible(true);
+    _workspace->setReadOnly(false);
+
     readContentFromFile();
+}
+
+void UI::createTemporaryFile() {
+    resetLayout();
+    _save_action->setEnabled(false);
+    _encrypt_menu->setEnabled(true);
+    _decrypt_menu->setEnabled(true);
+    _workspace->setVisible(true);
+    _workspace->setReadOnly(false);
 }
 
 void UI::readContentFromFile() {
@@ -183,15 +202,9 @@ void UI::readContentFromFile() {
     QString input_text;
     QTextStream in(&_file);
     in >> input_text;
-    _lines.top().setText(input_text);
+    _lines.emplace(input_text);
+    _workspace->setText(input_text);
     _file.close();
-}
-
-void UI::createTemporaryFile() {
-    resetLayout();
-    _save_action->setEnabled(false);
-    _encrypt_menu->setEnabled(true);
-    _decrypt_menu->setEnabled(true);
 }
 
 void UI::saveFileAs() {
@@ -209,7 +222,7 @@ void UI::saveFile() {
     }
 
     QTextStream out(&_file);
-    out << _lines.top().text();
+    out << _lines.top();
     _file.close();
 }
 
