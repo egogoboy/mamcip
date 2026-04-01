@@ -35,7 +35,8 @@ class UI : public QMainWindow {
                 return;
             }
 
-            if (event->text().contains(QRegExp("[^А-ИК-Я_\b]")) || toPlainText().size() >= 30) {
+            if (event->text().contains(QRegExp("[^А-ИК-Я_\b]")) ||
+                toPlainText().size() >= 30) {
                 return;
             }
 

@@ -122,7 +122,7 @@ void UI::initWidgets() {
             }
 
             _lines.emplace(_cur_method(_lines.top(), key.value()));
-            _workspace->insertPlainText("\n" + _lines.top());
+            _workspace->append(_lines.top());
             _workspace->setReadOnly(true);
         }
     });
@@ -186,7 +186,7 @@ void UI::saveFile() {
     if (!_lines.empty()) {
         out << _lines.top();
     } else {
-        out << "";
+        out << _workspace->toPlainText();
     }
     _file.close();
 }
@@ -207,7 +207,6 @@ void UI::readContentFromFile() {
     QString input_text;
     QTextStream in(&_file);
     in >> input_text;
-    _lines.emplace(input_text);
     _workspace->setText(input_text);
     _file.close();
 }
