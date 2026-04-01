@@ -75,14 +75,14 @@ void UI::initMenuBar() {
     connect(connectedAction, &QAction::triggered, this,
             &UI::createTemporaryFile);
     connectedAction = fileMenu->addAction("Открыть");
+    fileMenu->addSeparator();
     connect(connectedAction, &QAction::triggered, this, &UI::openFile);
     _save_action = fileMenu->addAction("Сохранить");
     _save_action->setEnabled(false);
     connect(_save_action, &QAction::triggered, this, &UI::saveFile);
     connectedAction = fileMenu->addAction("Сохранить как");
+    fileMenu->addSeparator();
     connect(connectedAction, &QAction::triggered, this, &UI::saveFileAs);
-    QAction* nonInteractiveAction = fileMenu->addAction("");
-    nonInteractiveAction->setEnabled(false);
     connectedAction = fileMenu->addAction("Выход");
     connect(connectedAction, &QAction::triggered, this, &QApplication::quit);
 
