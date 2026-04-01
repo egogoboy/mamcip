@@ -17,35 +17,64 @@ class UI : public QMainWindow {
     void encode();
     void decode();
     void openFile();
-    void createTemporaryFile();
+    void createFile();
     void saveFile();
     void saveFileAs();
     void readContentFromFile();
+    void onWorkspaceEdit();
 
    private:
+    class CustomTextEdit : public QTextEdit {
+       public:
+        CustomTextEdit(QWidget* parent) : QTextEdit(parent) {}
+
+       protected:
+        void keyPressEvent(QKeyEvent* event) override {
+            if (event->key() == Qt::Key_Backspace) {
+                QTextEdit::keyPressEvent(event);
+            }
+
+            if (event->text().contains(QRegExp("[^А-ИК-Я_\b]"))) {
+                return;
+            }
+
+            if (toPlainText().size() >= 30) {
+                return;
+            }
+
+            QTextEdit::keyPressEvent(event);
+        }
+    };
+
     void initMenuBar();
     void initLayout();
-    void resetLayout();
+    void resetWorkspace();
     void initValidator();
     void initWidgets();
+    void validateInputText();
     std::optional<int> askKey();
 
     QWidget* _window;
-    QVBoxLayout* _layout;
+    QStackedLayout* _layout;
+    CustomTextEdit* _workspace;
+
     QValidator* _input_text_validator;
     QValidator* _key_validator;
+
     QInputDialog* _key_input_dialog;
+
     QAction* _save_action;
     QAction* _show_help_action;
+
     QMenu* _encrypt_menu;
     QMenu* _decrypt_menu;
-    QString (*_cur_method)(const QString&, int);
-    QFile _file;
-    bool _file_opened = false;
-    std::stack<QLineEdit> _lines;
 
-    QString _current_file;
-    QString _help_text;
+    QString (*_cur_method)(const QString&, int);
+
+    QFile _file;
+
+    bool _file_opened = false;
+    std::stack<QString> _lines;
 
     const QString ABOUT_MESSAGE = R"(
 Шифрование методами подстановки
@@ -54,20 +83,9 @@ class UI : public QMainWindow {
 
 Судаков Е.Ю., ИПБ-23)";
 
-    const QString HELP_MESSAGE_ENCODE = R"(
+    const QString HELP_MESSAGE = R"(
 1. Ввести открытый текст с клавиатуры или загрузить из файла
-2. Выбрать метод зашифрования в выпадающем меню  
-3. Выбрать из выпадающего списка ключ, используемый при зашифровании
-
-Описание моноалфавитного метода.
-Каждой букве алфавита открытого текста ставится в соответствие одна буква закрытого текста из этого же алфавита.
-)";
-    const QString HELP_MESSAGE_DECODE = R"(
-1. Ввести или загрузить шифротекст из файла
-2. Выбрать метод расшифрования в выпадающем меню  
-3. Выбрать из выпадающего списка ключ, используемый при расшифровании
-
-Описание моноалфавитного метода.
-Каждой букве алфавита открытого текста ставится в соответствие одна буква закрытого текста из этого же алфавита.
+2. Выбрать метод зашифрования/расшифрования в выпадающем меню  
+3. Ввести целое положительное значение ключа, используемого при зашифровании/расшифровании
 )";
 };
